@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../screens/product_detail_screen.dart';
 import '../providers/product.dart';
+import '../providers/cart.dart';
 
 class ProductItem extends StatelessWidget {
   // final String id;
@@ -13,7 +14,10 @@ class ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // product listener is false because I am using a consumer for the specific part I want
     final product = Provider.of<Product>(context, listen: false);
+    // cart listener is false because I am not interested in listening to changes, just sending info
+    final cart = Provider.of<Cart>(context, listen: false);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
@@ -42,14 +46,16 @@ class ProductItem extends StatelessWidget {
                   },
                   icon: Icon(
                     product.isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: Theme.of(context).accentColor,
+                    color: Theme.of(context).colorScheme.secondary,
                   )),
             ),
             trailing: IconButton(
-                onPressed: null,
+                onPressed: () {
+                  cart.addProduct(product.id, product.price, product.title);
+                },
                 icon: Icon(
                   Icons.shopping_basket,
-                  color: Theme.of(context).accentColor,
+                  color: Theme.of(context).colorScheme.secondary,
                 )),
           ),
         ),
