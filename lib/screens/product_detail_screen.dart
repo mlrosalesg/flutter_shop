@@ -28,7 +28,20 @@ class ProductDetailScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 10),
-            Text('\$${loadedProduct.price}')
+            Text(
+              '\$${loadedProduct.price}',
+              style: Theme.of(context).textTheme.headline6,
+            ),
+            SizedBox(height: 10),
+            Container(
+              padding: EdgeInsets.all(10),
+              width: double.infinity,
+              child: Text(
+                loadedProduct.description,
+                style: Theme.of(context).textTheme.subtitle1,
+                textAlign: TextAlign.center,
+              ),
+            ),
           ],
         ),
       ),

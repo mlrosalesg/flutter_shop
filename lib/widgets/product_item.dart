@@ -51,7 +51,7 @@ class ProductItem extends StatelessWidget {
             ),
             trailing: IconButton(
                 onPressed: () {
-                  cart.addProduct(product.id, product.price, product.title);
+                  cart.addItem(product.id, product.price, product.title);
                 },
                 icon: Icon(
                   Icons.shopping_basket,
