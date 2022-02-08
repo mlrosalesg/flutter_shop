@@ -27,32 +27,65 @@ class EditProductScreen extends StatefulWidget {
 }
 
 class _EditProductScreenState extends State<EditProductScreen> {
-  // Need to have one for each field
+  // To use the next button, need to have one for each field
   final _priceFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
-  //This controller is not necessary but I have it for the sake of following
-  //the tutorial, I can just store the data in _imageUrl directly
-  //final _imageUrlController = TextEditingController();
+  //Controller created to update the image without submitting the form
+  final _imageUrlController = TextEditingController();
+  //Focus node to make sure the image is updated when I lose focus
   final _imageUrlFocusNode = FocusNode();
+  //Key to save form
   final _form = GlobalKey<FormState>();
 
+  var _isInit = true;
+
   // Form variables
+  String? id;
   String _title = '';
   double _price = 0;
   String _description = '';
   String _imageUrl = '';
+  bool _isFavorite = false;
 
   @override
   void initState() {
     //I create this listener to make sure the image updates if I lose focus of
-    //the imageUrl
     _imageUrlFocusNode.addListener(_updateImageUrl);
     super.initState();
   }
 
-  ///Check if the focusnode lost focus to trigger the setState and show the new image
+  @override
+  void didChangeDependencies() {
+    //I had to make this to extract the arguments and work with the provider
+    //because I cannot do it from initState as the context is not loaded there.
+    //Another solution would  be to use Future.delayed(Duration.zero) but feels
+    //to messy imho and I read  it doesn't work with provider. If I only needed
+    //the arguments I could use onRouteChanged in the MaterialApp
+    if (_isInit) {
+      id = ModalRoute.of(context)!.settings.arguments as String?;
+      if (id != null && id!.isNotEmpty) {
+        var _editedProduct =
+            Provider.of<Products>(context, listen: false).findById(id!);
+        _title = _editedProduct.title;
+        _description = _editedProduct.description;
+        _price = _editedProduct.price;
+        _imageUrl = _editedProduct.imageUrl;
+        _isFavorite = _editedProduct.isFavorite;
+      }
+      _isInit = false;
+
+      // I cant assign initial value and controller to the same field
+      _imageUrlController.text = _imageUrl;
+    }
+    super.didChangeDependencies();
+  }
+
+  ///Check if the focusnode lost focus to trigger the setState and show the new
+  ///image
   void _updateImageUrl() {
-    if (!_imageUrlFocusNode.hasFocus && isValidImageUrl(_imageUrl)) {
+    //if (!_imageUrlFocusNode.hasFocus && isValidImageUrl(_imageUrl)) {
+    if (!_imageUrlFocusNode.hasFocus &&
+        isValidImageUrl(_imageUrlController.text)) {
       setState(() {});
     }
   }
@@ -64,16 +97,22 @@ class _EditProductScreenState extends State<EditProductScreen> {
     }
     _form.currentState?.save();
 
-    print('Product saved! ' + _title);
-
     var _product = Product(
-        id: '',
+        id: id ?? '',
         title: _title,
         description: _description,
         price: _price,
-        imageUrl: _imageUrl);
+        imageUrl: _imageUrl,
+        isFavorite: _isFavorite);
 
-    Provider.of<Products>(context, listen: false).addProduct(_product);
+    if (id == null) {
+      Provider.of<Products>(context, listen: false).addProduct(_product);
+      print('Added new product!');
+    } else {
+      Provider.of<Products>(context, listen: false)
+          .updateProduct(id!, _product);
+      print('Updated product with id $id!');
+    }
     Navigator.of(context).pop();
   }
 
@@ -82,7 +121,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   void dispose() {
     _priceFocusNode.dispose();
     _descriptionFocusNode.dispose();
-    //_imageUrlController.dispose();
+    _imageUrlController.dispose();
     _imageUrlFocusNode.removeListener(_updateImageUrl);
     _imageUrlFocusNode.dispose();
     super.dispose();
@@ -123,12 +162,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   }
                   return null;
                 },
+                initialValue: _title,
               ),
               TextFormField(
                 decoration: InputDecoration(label: Text('Price')),
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.next,
                 focusNode: _priceFocusNode,
+                initialValue: _price.toString(),
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_descriptionFocusNode);
                 },
@@ -161,6 +202,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   }
                   return null;
                 },
+                initialValue: _description,
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -171,12 +213,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     margin: EdgeInsets.only(top: 8, right: 10),
                     decoration: BoxDecoration(
                         border: Border.all(width: 1, color: Colors.grey)),
-                    //child: _imageUrlController.text.isEmpty
-                    child: _imageUrl.isEmpty
+                    child: _imageUrlController.text.isEmpty
+                        //child: _imageUrl.isEmpty
                         ? Align(child: Text('Enter a URL'))
                         : Image.network(
-                            _imageUrl,
-                            //_imageUrlController.text,
+                            //_imageUrl,
+                            _imageUrlController.text,
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) {
                               return Align(
@@ -195,14 +237,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       keyboardType: TextInputType.url,
                       textInputAction: TextInputAction.done,
                       focusNode: _imageUrlFocusNode,
-                      //controller: _imageUrlController,
+                      controller: _imageUrlController,
                       onFieldSubmitted: (value) {
                         if (isValidImageUrl(value)) {
                           setState(() {
-                            _imageUrl = value;
+                            //_imageUrl = value;
                           });
                         }
-                        //_saveForm();
                       },
                       onSaved: (value) {
                         _imageUrl = value ?? _imageUrl;

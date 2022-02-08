@@ -4,7 +4,14 @@ import 'package:shop/screens/edit_product_screen.dart';
 class UserProductItem extends StatelessWidget {
   final String title;
   final String imageUrl;
-  UserProductItem({required this.title, required this.imageUrl});
+  final String id;
+  final Function deleteHandler;
+
+  UserProductItem(
+      {required this.title,
+      required this.imageUrl,
+      required this.id,
+      required this.deleteHandler});
 
   @override
   Widget build(BuildContext context) {
@@ -19,12 +26,15 @@ class UserProductItem extends StatelessWidget {
           children: [
             IconButton(
               onPressed: () {
-                Navigator.of(context).pushNamed(EditProductScreen.routeName);
+                Navigator.of(context)
+                    .pushNamed(EditProductScreen.routeName, arguments: id);
               },
               icon: Icon(Icons.edit),
             ),
             IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  deleteHandler(id);
+                },
                 icon: Icon(
                   Icons.delete,
                   color: Theme.of(context).errorColor,
