@@ -44,7 +44,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
   String _title = '';
   double _price = 0;
   String _description = '';
-  String _imageUrl = '';
+  String _imageUrl =
+      'https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/2019-honda-civic-sedan-1558453497.jpg';
   bool _isFavorite = false;
   bool _isLoading = false;
 
@@ -113,7 +114,21 @@ class _EditProductScreenState extends State<EditProductScreen> {
     if (id == null) {
       Provider.of<Products>(context, listen: false)
           .addProduct(_product)
-          .then((_) {
+          .catchError((error) {
+        return showDialog<Null>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+                  title: Text('An error ocurred!'),
+                  content: Text('Something went wrong'),
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                        },
+                        child: Text('OK'))
+                  ],
+                ));
+      }).then((value) {
         Navigator.of(context).pop();
         setState(() {
           _isLoading = false;
