@@ -110,35 +110,40 @@ class _EditProductScreenState extends State<EditProductScreen> {
         imageUrl: _imageUrl,
         isFavorite: _isFavorite);
 
-    if (id == null) {
-      try {
+    try {
+      if (id == null) {
         await Provider.of<Products>(context, listen: false)
             .addProduct(_product);
-      } catch (error) {
-        await showDialog<Null>(
-            context: context,
-            builder: (ctx) => AlertDialog(
-                  title: Text('An error ocurred!'),
-                  content: Text('Something went wrong'),
-                  actions: [
-                    TextButton(
-                        onPressed: () {
-                          Navigator.of(ctx).pop();
-                        },
-                        child: Text('OK'))
-                  ],
-                ));
-      } finally {
-        Navigator.of(context).pop();
-        setState(() {
-          _isLoading = false;
-        });
+      } else {
+        await Provider.of<Products>(context, listen: false)
+            .updateProduct(id!, _product);
       }
-    } else {
-      Provider.of<Products>(context, listen: false)
-          .updateProduct(id!, _product);
-      Navigator.of(context).pop();
+    } catch (error) {
+      await showDialog<Null>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+                title: Text('An error ocurred!'),
+                content: Text('Something went wrong'),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                      },
+                      child: Text('OK'))
+                ],
+              ));
     }
+
+    // if (id == null) {
+    //   await Provider.of<Products>(context, listen: false).addProduct(_product);
+    // } else {
+    //   await Provider.of<Products>(context, listen: false)
+    //       .updateProduct(id!, _product);
+    // }
+    Navigator.of(context).pop();
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   // Always dispose the focus nodes after using!!

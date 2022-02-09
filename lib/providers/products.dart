@@ -40,8 +40,11 @@ class Products with ChangeNotifier {
     ), */
   ];
   // var _showFavoritesOnly = false;
-  final productsUrl =
-      'https://flutter-shop-2502a-default-rtdb.firebaseio.com/products.json';
+  final mainUrl = 'flutter-shop-2502a-default-rtdb.firebaseio.com';
+  final productsUrl = 'products.json';
+  String getProductUrl(String id) {
+    return 'products/$id.json';
+  }
 
   List<Product> get items {
     // if (_showFavoritesOnly) {
@@ -55,7 +58,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProducts() async {
-    final url = Uri.parse(productsUrl);
+    //final url = Uri.parse(productsUrl);
+    final url = Uri.https(mainUrl, productsUrl);
     try {
       final response = await http.get(url);
       final data = json.decode(response.body) as Map<String, dynamic>;
@@ -82,7 +86,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    final url = Uri.parse(productsUrl);
+    //final url = Uri.parse(productsUrl);
+    final url = Uri.https(mainUrl, productsUrl);
     try {
       final response = await http.post(url,
           body: json.encode({
@@ -107,11 +112,27 @@ class Products with ChangeNotifier {
     }
   }
 
-  void updateProduct(String id, Product newProduct) {
+  Future<void> updateProduct(String id, Product newProduct) async {
     final index = _items.indexWhere((prod) => prod.id == id);
-    _items[index] = newProduct;
+    if (index >= 0) {
+      try {
+        final url = Uri.https(mainUrl, getProductUrl(id));
+        await http.patch(url,
+            body: json.encode({
+              'title': newProduct.title,
+              'description': newProduct.description,
+              'imageUrl': newProduct.imageUrl,
+              'price': newProduct.price,
+            }));
+        _items[index] = newProduct;
 
-    notifyListeners();
+        notifyListeners();
+      } catch (error) {
+        print('Error in updateProduct($id)');
+        print(error.toString());
+        throw error;
+      }
+    }
   }
 
   Product findById(String id) {
