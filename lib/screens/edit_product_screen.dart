@@ -44,8 +44,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   String _title = '';
   double _price = 0;
   String _description = '';
-  String _imageUrl =
-      'https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/2019-honda-civic-sedan-1558453497.jpg';
+  String _imageUrl = '';
   bool _isFavorite = false;
   bool _isLoading = false;
 
@@ -140,7 +139,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
           .updateProduct(id!, _product);
       Navigator.of(context).pop();
     }
-    //Navigator.of(context).pop();
   }
 
   // Always dispose the focus nodes after using!!

@@ -6,7 +6,7 @@ import './product.dart';
 
 class Products with ChangeNotifier {
   List<Product> _items = [
-    Product(
+    /* Product(
       id: 'p1',
       title: 'Red Shirt',
       description: 'A red shirt - it is pretty red!',
@@ -37,9 +37,11 @@ class Products with ChangeNotifier {
       price: 49.99,
       imageUrl:
           'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-    ),
+    ), */
   ];
   // var _showFavoritesOnly = false;
+  final productsUrl =
+      'https://flutter-shop-2502a-default-rtdb.firebaseio.com/products.json';
 
   List<Product> get items {
     // if (_showFavoritesOnly) {
@@ -52,9 +54,35 @@ class Products with ChangeNotifier {
     return _items.where((prodItem) => prodItem.isFavorite).toList();
   }
 
+  Future<void> fetchAndSetProducts() async {
+    final url = Uri.parse(productsUrl);
+    try {
+      final response = await http.get(url);
+      final data = json.decode(response.body) as Map<String, dynamic>;
+
+      final List<Product> loadedProducts = [];
+
+      data.forEach((id, map) {
+        loadedProducts.add(Product(
+          id: id,
+          title: map['title'],
+          description: map['description'],
+          imageUrl: map['imageUrl'],
+          price: map['price'],
+          isFavorite: map['isFavorite'],
+        ));
+      });
+      _items = loadedProducts;
+      notifyListeners();
+    } catch (error) {
+      print('Error in fetchAndSetProducts()');
+      print(error.toString());
+      throw error;
+    }
+  }
+
   Future<void> addProduct(Product product) async {
-    final url = Uri.parse(
-        'https://flutter-shop-2502a-default-rtdb.firebaseio.com/products');
+    final url = Uri.parse(productsUrl);
     try {
       final response = await http.post(url,
           body: json.encode({
@@ -73,6 +101,7 @@ class Products with ChangeNotifier {
       _items.add(newProduct);
       notifyListeners();
     } catch (error) {
+      print('Error in addProduct()');
       print(error.toString());
       throw error;
     }
@@ -103,4 +132,5 @@ class Products with ChangeNotifier {
   //   _showFavoritesOnly = false;
   //   notifyListeners();
   // }
+
 }
