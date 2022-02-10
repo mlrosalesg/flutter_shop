@@ -134,12 +134,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
               ));
     }
 
-    // if (id == null) {
-    //   await Provider.of<Products>(context, listen: false).addProduct(_product);
-    // } else {
-    //   await Provider.of<Products>(context, listen: false)
-    //       .updateProduct(id!, _product);
-    // }
     Navigator.of(context).pop();
     setState(() {
       _isLoading = false;

@@ -135,13 +135,28 @@ class Products with ChangeNotifier {
     }
   }
 
-  Product findById(String id) {
-    return _items.firstWhere((prod) => prod.id == id);
+  void deleteProduct(String id) {
+    //final url = Uri.https(mainUrl, getProductUrl(id));
+    final url = Uri.parse(
+        'https://flutter-shop-2502a-default-rtdb.firebaseio.com/products/$id');
+    var existingProduct = findById(id);
+    final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
+
+    http.delete(url).then((response) {
+      if (response.statusCode != 200) {
+        throw Exception('Failed to delete product');
+      }
+    }).catchError((_) {
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+    });
+    _items.removeAt(existingProductIndex);
+    http.delete(url);
+    notifyListeners();
   }
 
-  void deleteProduct(String id) {
-    _items.removeWhere((prod) => prod.id == id);
-    notifyListeners();
+  Product findById(String id) {
+    return _items.firstWhere((prod) => prod.id == id);
   }
 
   // void showFavoritesOnly() {
