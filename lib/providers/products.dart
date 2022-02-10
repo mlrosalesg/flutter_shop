@@ -135,24 +135,22 @@ class Products with ChangeNotifier {
     }
   }
 
-  void deleteProduct(String id) {
-    //final url = Uri.https(mainUrl, getProductUrl(id));
-    final url = Uri.parse(
-        'https://flutter-shop-2502a-default-rtdb.firebaseio.com/products/$id');
-    var existingProduct = findById(id);
-    final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
-
-    http.delete(url).then((response) {
+  Future<void> deleteProduct(String id) async {
+    final url = Uri.https(mainUrl, getProductUrl(id));
+    //final url = Uri.parse(
+    //    'https://flutter-shop-2502a-default-rtdb.firebaseio.com/products/$id');
+    try {
+      final response = await http.delete(url);
       if (response.statusCode != 200) {
         throw Exception('Failed to delete product');
       }
-    }).catchError((_) {
-      _items.insert(existingProductIndex, existingProduct);
+      _items.removeWhere((prod) => prod.id == id);
       notifyListeners();
-    });
-    _items.removeAt(existingProductIndex);
-    http.delete(url);
-    notifyListeners();
+    } catch (error) {
+      print('Error in deleteProduct($id)');
+      print(error.toString());
+      throw error;
+    }
   }
 
   Product findById(String id) {

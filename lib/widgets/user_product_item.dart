@@ -32,8 +32,15 @@ class UserProductItem extends StatelessWidget {
               icon: Icon(Icons.edit),
             ),
             IconButton(
-                onPressed: () {
-                  deleteHandler(id);
+                onPressed: () async {
+                  try {
+                    await deleteHandler(id);
+                  } catch (error) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('Cannot delete item!'),
+                      duration: Duration(seconds: 1),
+                    ));
+                  }
                 },
                 icon: Icon(
                   Icons.delete,
