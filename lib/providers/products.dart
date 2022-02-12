@@ -117,13 +117,17 @@ class Products with ChangeNotifier {
     if (index >= 0) {
       try {
         final url = Uri.https(mainUrl, getProductUrl(id));
-        await http.patch(url,
+        final response = await http.patch(url,
             body: json.encode({
               'title': newProduct.title,
               'description': newProduct.description,
               'imageUrl': newProduct.imageUrl,
               'price': newProduct.price,
+              'isFavorite': newProduct.isFavorite,
             }));
+        if (response.statusCode >= 400) {
+          throw Exception('Failed to update product');
+        }
         _items[index] = newProduct;
 
         notifyListeners();
@@ -141,7 +145,7 @@ class Products with ChangeNotifier {
     //    'https://flutter-shop-2502a-default-rtdb.firebaseio.com/products/$id');
     try {
       final response = await http.delete(url);
-      if (response.statusCode != 200) {
+      if (response.statusCode >= 400) {
         throw Exception('Failed to delete product');
       }
       _items.removeWhere((prod) => prod.id == id);
