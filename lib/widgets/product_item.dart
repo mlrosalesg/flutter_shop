@@ -41,8 +41,15 @@ class ProductItem extends StatelessWidget {
             backgroundColor: Colors.black87,
             leading: Consumer<Product>(
               builder: (ctx, product, child) => IconButton(
-                  onPressed: () {
-                    product.toggleFavoriteStatus();
+                  onPressed: () async {
+                    try {
+                      await product.toggleFavoriteStatus();
+                    } catch (error) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text('Cannot change favorite status!'),
+                        duration: Duration(seconds: 1),
+                      ));
+                    }
                   },
                   icon: Icon(
                     product.isFavorite ? Icons.favorite : Icons.favorite_border,

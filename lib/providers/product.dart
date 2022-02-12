@@ -27,6 +27,8 @@ class Product with ChangeNotifier {
 
   Future<void> toggleFavoriteStatus() async {
     final newStatus = !isFavorite;
+    isFavorite = newStatus;
+    notifyListeners();
     try {
       final url = Uri.https(mainUrl, getProductUrl(id));
       //final url = Uri.https(mainUrl, 'products/$id');
@@ -37,12 +39,12 @@ class Product with ChangeNotifier {
       if (response.statusCode >= 400) {
         throw Exception('Failed to update product');
       }
-      isFavorite = newStatus;
-      notifyListeners();
       print('toggled favorite');
     } catch (error) {
       print('Error in updateProduct($id)');
       print(error.toString());
+      isFavorite = !newStatus;
+      notifyListeners();
       throw error;
     }
   }

@@ -140,10 +140,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> deleteProduct(String id) async {
-    final url = Uri.https(mainUrl, getProductUrl(id));
-    //final url = Uri.parse(
-    //    'https://flutter-shop-2502a-default-rtdb.firebaseio.com/products/$id');
     try {
+      final url = Uri.https(mainUrl, getProductUrl(id));
       final response = await http.delete(url);
       if (response.statusCode >= 400) {
         throw Exception('Failed to delete product');

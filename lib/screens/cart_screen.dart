@@ -53,17 +53,7 @@ class CartScreen extends StatelessWidget {
                           backgroundColor:
                               Theme.of(context).colorScheme.primary,
                         ),
-                        TextButton(
-                          onPressed: () {
-                            Provider.of<Orders>(context, listen: false)
-                                .addOrder(cart.itemsList, cart.totalAmount);
-                            cart.clear();
-                          },
-                          child: Text(
-                            'ORDER NOW',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        )
+                        OrderButton(cart: cart)
                       ],
                     ),
                   ),
@@ -73,6 +63,63 @@ class CartScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class OrderButton extends StatefulWidget {
+  const OrderButton({
+    Key? key,
+    required this.cart,
+  }) : super(key: key);
+
+  final Cart cart;
+
+  @override
+  State<OrderButton> createState() => _OrderButtonState();
+}
+
+class _OrderButtonState extends State<OrderButton> {
+  var _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: (widget.cart.totalAmount <= 0 || _isLoading)
+          ? null
+          : () async {
+              setState(() {
+                _isLoading = true;
+              });
+              try {
+                await Provider.of<Orders>(context, listen: false)
+                    .addOrder(widget.cart.itemsList, widget.cart.totalAmount);
+                widget.cart.clear();
+              } catch (error) {
+                await showDialog<Null>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                          title: Text('An error ocurred!'),
+                          content: Text('Something went wrong'),
+                          actions: [
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.of(ctx).pop();
+                                },
+                                child: Text('OK'))
+                          ],
+                        ));
+              }
+              setState(() {
+                _isLoading = false;
+              });
+            },
+      child: _isLoading
+          ? CircularProgressIndicator()
+          : Text(
+              'ORDER NOW',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
     );
   }
 }
