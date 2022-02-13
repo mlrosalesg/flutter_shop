@@ -33,7 +33,6 @@ class Orders with ChangeNotifier {
 
   Future<void> addOrder(List<CartItem> items, double total) async {
     final url = Uri.https(mainUrl, ordersUrl);
-    //final url = Uri.https(mainUrl, 'orders');
     final timeStamp = DateTime.now();
     try {
       final response = await http.post(url,
@@ -59,6 +58,34 @@ class Orders with ChangeNotifier {
       notifyListeners();
     } catch (error) {
       print('Error in addOrder()');
+      print(error.toString());
+      throw error;
+    }
+  }
+
+  Future<void> fetchAndSetOrders() async {
+    //final url = Uri.parse(productsUrl);
+    final url = Uri.https(mainUrl, ordersUrl);
+    print('fetch and set');
+    try {
+      final response = await http.get(url);
+      final data = json.decode(response.body) as Map<String, dynamic>?;
+      if (data == null) return;
+
+      final List<OrderItem> loadedOrders = [];
+
+      data.forEach((id, map) {
+        loadedOrders.add(OrderItem(
+          id: id,
+          totalAmount: map['totalAmount'],
+          date: DateTime.parse(map['date']),
+          products: [],
+        ));
+      });
+      _orderList = loadedOrders.reversed.toList();
+      notifyListeners();
+    } catch (error) {
+      print('Error in fetchAndSetOrders()');
       print(error.toString());
       throw error;
     }

@@ -62,7 +62,9 @@ class Products with ChangeNotifier {
     final url = Uri.https(mainUrl, productsUrl);
     try {
       final response = await http.get(url);
-      final data = json.decode(response.body) as Map<String, dynamic>;
+      final data = json.decode(response.body) as Map<String, dynamic>?;
+
+      if (data == null) return;
 
       final List<Product> loadedProducts = [];
 
