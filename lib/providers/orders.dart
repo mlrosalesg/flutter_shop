@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shop/providers/product.dart';
 import 'dart:convert';
 
 import 'cart.dart';
@@ -79,7 +80,13 @@ class Orders with ChangeNotifier {
           id: id,
           totalAmount: map['totalAmount'],
           date: DateTime.parse(map['date']),
-          products: [],
+          products: (map['totalAmount'] as List<dynamic>)
+              .map((p) => CartItem(
+                  id: p['id'],
+                  title: p['title'],
+                  quantity: p['quantity'],
+                  price: p['price']))
+              .toList(),
         ));
       });
       _orderList = loadedOrders.reversed.toList();
