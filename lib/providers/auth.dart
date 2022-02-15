@@ -22,11 +22,11 @@ class Auth with ChangeNotifier {
           }));
 
       final data = json.decode(response.body) as Map<String, dynamic>?;
-      print(data);
 
-      if (response.statusCode != 200) {
-        throw Exception((data!['error'] as Map<String, dynamic>)['message'] ??
-            'Unknown exception');
+      if (data!.containsKey('error')) {
+        throw Exception(data['error']['message']);
+      } else if (response.statusCode != 200) {
+        throw Exception('Unknown error!');
       }
 
       if (data == null || data['idToken'] == null) {
@@ -38,14 +38,15 @@ class Auth with ChangeNotifier {
       return;
     } catch (error) {
       print(error.toString());
+      throw error;
     }
   }
 
   Future<void> signup(String email, String password) async {
-    _authenticate(email, password, 'signUp');
+    return _authenticate(email, password, 'signUp');
   }
 
   Future<void> login(String email, String password) async {
-    _authenticate(email, password, 'signInWithPassword');
+    return _authenticate(email, password, 'signInWithPassword');
   }
 }

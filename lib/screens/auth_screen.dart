@@ -99,6 +99,22 @@ class _AuthCardState extends State<AuthCard> {
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
+  Future<void> _showErrorDialog(String message) {
+    return showDialog<Null>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              title: Text('Oh no!'),
+              content: Text(message),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                    },
+                    child: Text('OK'))
+              ],
+            ));
+  }
+
   Future<void> _submit() async {
     final isValid = _formKey.currentState?.validate();
     if (isValid == null || !isValid) {
@@ -109,12 +125,41 @@ class _AuthCardState extends State<AuthCard> {
     setState(() {
       _isLoading = true;
     });
-    if (_authMode == AuthMode.Login) {
-      // Log user in
-      await Provider.of<Auth>(context, listen: false).login(_email, _password);
-    } else {
-      // Sign user up
-      await Provider.of<Auth>(context, listen: false).signup(_email, _password);
+    try {
+      if (_authMode == AuthMode.Login) {
+        // Log user in
+        await Provider.of<Auth>(context, listen: false)
+            .login(_email, _password);
+      } else {
+        // Sign user up
+        await Provider.of<Auth>(context, listen: false)
+            .signup(_email, _password);
+      }
+    } catch (error) {
+      var errorMessage = 'Error during authentication. ';
+      if (error.toString().contains('EMAIL_NOT_FOUND')) {
+        errorMessage += 'Email is not valid';
+      } else if (error.toString().contains('INVALID_PASSWORD')) {
+        errorMessage += 'Password is not valid';
+      } else if (error.toString().contains('EMAIL_EXISTS')) {
+        errorMessage += 'There is already an account with this email';
+      } else if (error.toString().contains('TOO_MANY_ATTEMPTS_TRY_LATER')) {
+        errorMessage += 'You have tried this too many times';
+      }
+      await _showErrorDialog(errorMessage);
+      /* await showDialog<Null>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+                title: Text('An error ocurred!'),
+                content: Text('Something went wrong'),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                      },
+                      child: Text('OK'))
+                ],
+              )); */
     }
     setState(() {
       _isLoading = false;
