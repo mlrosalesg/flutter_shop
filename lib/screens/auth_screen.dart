@@ -1,5 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/auth.dart';
 
 enum AuthMode { Signup, Login }
 
@@ -10,8 +13,7 @@ class AuthScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
     final theme = Theme.of(context);
-    // final transformConfig = Matrix4.rotationZ(-8 * pi / 180);
-    // transformConfig.translate(-10.0);
+
     return Scaffold(
       // resizeToAvoidBottomInset: false,
       body: Stack(
@@ -59,7 +61,7 @@ class AuthScreen extends StatelessWidget {
                       child: Text(
                         'Lula Store',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color: theme.colorScheme.onPrimary,
                           fontSize: 50,
                           fontFamily: 'Anton',
                         ),
@@ -92,14 +94,12 @@ class AuthCard extends StatefulWidget {
 class _AuthCardState extends State<AuthCard> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   AuthMode _authMode = AuthMode.Login;
-  Map<String, String> _authData = {
-    'email': '',
-    'password': '',
-  };
+  var _email = '';
+  var _password = '';
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
-  void _submit() {
+  Future<void> _submit() async {
     final isValid = _formKey.currentState?.validate();
     if (isValid == null || !isValid) {
       // Invalid!
@@ -111,8 +111,10 @@ class _AuthCardState extends State<AuthCard> {
     });
     if (_authMode == AuthMode.Login) {
       // Log user in
+      await Provider.of<Auth>(context, listen: false).login(_email, _password);
     } else {
       // Sign user up
+      await Provider.of<Auth>(context, listen: false).signup(_email, _password);
     }
     setState(() {
       _isLoading = false;
@@ -140,7 +142,7 @@ class _AuthCardState extends State<AuthCard> {
       ),
       elevation: 8.0,
       child: Container(
-        height: _authMode == AuthMode.Signup ? 320 : 260,
+        height: _authMode == AuthMode.Signup ? 340 : 280,
         constraints:
             BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 320 : 260),
         width: deviceSize.width * 0.75,
@@ -162,7 +164,7 @@ class _AuthCardState extends State<AuthCard> {
                     return null;
                   },
                   onSaved: (value) {
-                    _authData['email'] = value ?? '';
+                    _email = value ?? '';
                   },
                 ),
                 TextFormField(
@@ -175,7 +177,7 @@ class _AuthCardState extends State<AuthCard> {
                     }
                   },
                   onSaved: (value) {
-                    _authData['password'] = value ?? '';
+                    _password = value ?? '';
                   },
                 ),
                 if (_authMode == AuthMode.Signup)
