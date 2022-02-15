@@ -26,10 +26,14 @@ class MyApp extends StatelessWidget {
         providers: [
           //I use create instead of value with all because I am creating a new
           //instance, not using an existing instance
-          ChangeNotifierProvider(create: (ctx) => Products()),
+          ChangeNotifierProvider(create: (ctx) => Auth()),
+          ChangeNotifierProxyProvider<Auth, Products>(
+            create: (ctx) => Products('', []),
+            update: (ctx, auth, previousProducts) =>
+                Products(auth.token, previousProducts?.items ?? []),
+          ),
           ChangeNotifierProvider(create: (ctx) => Cart()),
           ChangeNotifierProvider(create: (ctx) => Orders()),
-          ChangeNotifierProvider(create: (ctx) => Auth()),
         ],
         child: Consumer<Auth>(
           builder: (ctx, auth, _) {

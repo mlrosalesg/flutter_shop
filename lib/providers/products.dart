@@ -46,6 +46,10 @@ class Products with ChangeNotifier {
     return 'products/$id.json';
   }
 
+  final String authToken;
+
+  Products(this.authToken, this._items);
+
   List<Product> get items {
     // if (_showFavoritesOnly) {
     //   return _items.where((prodItem) => prodItem.isFavorite).toList();
@@ -59,7 +63,7 @@ class Products with ChangeNotifier {
 
   Future<void> fetchAndSetProducts() async {
     //final url = Uri.parse(productsUrl);
-    final url = Uri.https(mainUrl, productsUrl);
+    final url = Uri.https(mainUrl, productsUrl, {'auth': authToken});
     try {
       final response = await http.get(url);
       final data = json.decode(response.body) as Map<String, dynamic>?;
@@ -89,7 +93,7 @@ class Products with ChangeNotifier {
 
   Future<void> addProduct(Product product) async {
     //final url = Uri.parse(productsUrl);
-    final url = Uri.https(mainUrl, productsUrl);
+    final url = Uri.https(mainUrl, productsUrl, {'auth': authToken});
     try {
       final response = await http.post(url,
           body: json.encode({

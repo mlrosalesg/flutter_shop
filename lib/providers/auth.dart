@@ -34,20 +34,21 @@ class Auth with ChangeNotifier {
 
       final data = json.decode(response.body) as Map<String, dynamic>?;
 
-      if (data!.containsKey('error')) {
+      if (data == null) {
+        throw Exception('$urlSegment returned wrong response');
+      }
+
+      if (data.containsKey('error')) {
         throw Exception(data['error']['message']);
       } else if (response.statusCode != 200) {
         throw Exception('Unknown error!');
-      }
-
-      if (data == null || data['idToken'] == null) {
-        throw Exception('$urlSegment returned wrong response');
       }
 
       _token = data['idToken']!;
       _userId = data['localId']!;
       _expiry =
           DateTime.now().add(Duration(seconds: int.parse(data['expiresIn'])));
+
       notifyListeners();
       return;
     } catch (error) {
